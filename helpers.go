@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"math/big"
-	"pedersen-go/babyjub"
+	"github.com/thecodingshrimp/pedersen-go/babyjub"
 	"strconv"
 	"strings"
 )

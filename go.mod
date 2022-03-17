@@ -1,4 +1,4 @@
-module pedersen-go
+module github.com/thecodingshrimp/pedersen-go
 
 go 1.13
 

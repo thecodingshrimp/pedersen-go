@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/stretchr/testify/require"
-	"pedersen-go/babyjub"
+	"github.com/thecodingshrimp/pedersen-go/babyjub"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

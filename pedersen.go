@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"math/big"
-	"pedersen-go/babyjub"
+	"github.com/thecodingshrimp/pedersen-go/babyjub"
 )
 
 // var sha256Hash = sha256.New()
