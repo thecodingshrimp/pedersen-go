@@ -2,11 +2,12 @@ package pedersen
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"math/big"
-	"github.com/thecodingshrimp/pedersen-go/babyjub"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+	"github.com/thecodingshrimp/pedersen-go/babyjub"
 )
 
 func getBitAt(index int, bytes []byte) (byte, error) {
@@ -96,7 +97,7 @@ func bitsToFieldArray(bits []byte) string {
 }
 
 // Pack point method reference from edwardsCompress.zok in zokrates
-func PackPoint(point *babyjub.Point) [32]byte {
+func Compress_Zokrates(point *babyjub.Point) [32]byte {
 	yBytes := point.Y.Bytes()
 	res := [32]byte{}
 	copy(res[len(res)-len(yBytes):], yBytes)
