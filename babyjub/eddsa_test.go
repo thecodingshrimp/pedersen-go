@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/iden3/go-iden3-crypto/constants"
 	"github.com/stretchr/testify/assert"
 
 	"math/big"
@@ -18,7 +19,7 @@ func genInputs() (*PrivateKey, *big.Int) {
 	msgBuf := [32]byte{}
 	rand.Read(msgBuf[:])
 	msg := SetBigIntFromLEBytes(new(big.Int), msgBuf[:])
-	msg.Mod(msg, Q)
+	msg.Mod(msg, (*big.Int)(constants.Q))
 	fmt.Println("msg", msg)
 
 	return &k, msg

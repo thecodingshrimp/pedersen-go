@@ -6,20 +6,19 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/iden3/go-iden3-crypto/utils"
 	"github.com/stretchr/testify/require"
 	"github.com/thecodingshrimp/pedersen-go/babyjub"
 
 	"github.com/stretchr/testify/assert"
 )
 
-// todo test hinzufuegen, der padding testet
-
 func TestSmallerStringThanSegments(t *testing.T) {
 	ph := New(zokratesName, 171)
 	point, err := ph.PedersenHashBytes([]byte("0x"))
 	assert.Nil(t, err)
-	expectedX := babyjub.NewIntFromString("17663064468667073684455327659625297927281387087799066834838917694353926268364")
-	expectedY := babyjub.NewIntFromString("836518895347192760941794050894826815287693227629880735401338905422596126957")
+	expectedX := utils.NewIntFromString("17663064468667073684455327659625297927281387087799066834838917694353926268364")
+	expectedY := utils.NewIntFromString("836518895347192760941794050894826815287693227629880735401338905422596126957")
 	expectedPoint := babyjub.NewPoint()
 	expectedPoint.X = expectedX
 	expectedPoint.Y = expectedY
@@ -30,8 +29,8 @@ func TestPedersen_HashBytes(t *testing.T) {
 	ph := New(zokratesName, 0)
 	point, err := ph.PedersenHashBytes([]byte("abc"))
 	assert.Nil(t, err)
-	expectedX := babyjub.NewIntFromString("9869277320722751484529016080276887338184240285836102740267608137843906399765")
-	expectedY := babyjub.NewIntFromString("19790690237145851554496394080496962351633528315779989340140084430077208474328")
+	expectedX := utils.NewIntFromString("9869277320722751484529016080276887338184240285836102740267608137843906399765")
+	expectedY := utils.NewIntFromString("19790690237145851554496394080496962351633528315779989340140084430077208474328")
 	expectedPoint := babyjub.NewPoint()
 	expectedPoint.X = expectedX
 	expectedPoint.Y = expectedY
@@ -42,8 +41,8 @@ func TestPedersen_HashBytes2(t *testing.T) {
 	ph := New(zokratesName, 0)
 	point, err := ph.PedersenHashBytes([]byte("abcdefghijklmnopqrstuvwx"))
 	assert.Nil(t, err)
-	expectedX := babyjub.NewIntFromString("3966548799068703226441887746390766667253943354008248106643296790753369303077")
-	expectedY := babyjub.NewIntFromString("12849086395963202120677663823933219043387904870880733726805962981354278512988")
+	expectedX := utils.NewIntFromString("3966548799068703226441887746390766667253943354008248106643296790753369303077")
+	expectedY := utils.NewIntFromString("12849086395963202120677663823933219043387904870880733726805962981354278512988")
 	expectedPoint := babyjub.NewPoint()
 	expectedPoint.X = expectedX
 	expectedPoint.Y = expectedY

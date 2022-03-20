@@ -56,10 +56,12 @@ func (ph *PedersenHash) createGenerators() []*babyjub.Point {
 		}
 		j := i % 62
 		if j != 0 {
-			current = babyjub.NewPoint().Add(current, current)
-			current = babyjub.NewPoint().Add(current, current)
-			current = babyjub.NewPoint().Add(current, current)
-			current = babyjub.NewPoint().Add(current, current)
+			currentProjective := current.Projective()
+			currentProjective = babyjub.NewPointProjective().Add(currentProjective, currentProjective)
+			currentProjective = babyjub.NewPointProjective().Add(currentProjective, currentProjective)
+			currentProjective = babyjub.NewPointProjective().Add(currentProjective, currentProjective)
+			currentProjective = babyjub.NewPointProjective().Add(currentProjective, currentProjective)
+			current = currentProjective.Affine()
 		}
 		ph.generators[i] = current
 	}
@@ -115,16 +117,16 @@ func (ph *PedersenHash) pedersenHashWindows(windows []byte) (*babyjub.Point, err
 		windows = append(windows, make([]byte, padding)...)
 	}
 
-	result := babyjub.Infinity()
+	result := babyjub.Infinity().Projective()
 	segment := babyjub.NewPoint()
 	for j, window := range windows {
 		segment = segment.Mul(big.NewInt(int64((window&0x3)+1)), ph.generators[j])
 		if window > 0x3 {
 			segment.X = segment.X.Neg(segment.X)
 		}
-		result = result.Add(result, segment)
+		result = result.Add(result, segment.Projective())
 	}
-	return result, nil
+	return result.Affine(), nil
 }
 
 func (ph *PedersenHash) PedersenHashBytes(bytesArray ...[]byte) (*babyjub.Point, error) {
