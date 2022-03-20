@@ -12,6 +12,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// todo test hinzufuegen, der padding testet
+
+func TestSmallerStringThanSegments(t *testing.T) {
+	ph := New(zokratesName, 171)
+	point, err := ph.PedersenHashBytes([]byte("0x"))
+	assert.Nil(t, err)
+	expectedX := babyjub.NewIntFromString("17663064468667073684455327659625297927281387087799066834838917694353926268364")
+	expectedY := babyjub.NewIntFromString("836518895347192760941794050894826815287693227629880735401338905422596126957")
+	expectedPoint := babyjub.NewPoint()
+	expectedPoint.X = expectedX
+	expectedPoint.Y = expectedY
+	assert.Equal(t, expectedPoint, point)
+}
+
 func TestPedersen_HashBytes(t *testing.T) {
 	ph := New(zokratesName, 0)
 	point, err := ph.PedersenHashBytes([]byte("abc"))

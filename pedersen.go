@@ -30,13 +30,13 @@ func New(name string, segments int) *PedersenHash {
 		ph.name = name
 	}
 
+	ph.hasher256hash = makeHasher(sha256.New())
+
 	if segments > 0 {
 		ph.isSized = true
 		ph.segments = segments
 		ph.createGenerators()
 	}
-
-	ph.hasher256hash = makeHasher(sha256.New())
 
 	return ph
 }
