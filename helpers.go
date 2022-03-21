@@ -2,12 +2,10 @@ package pedersen
 
 import (
 	"fmt"
-	"math/big"
 	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/thecodingshrimp/pedersen-go/babyjub"
 )
 
 func getBitAt(index int, bytes []byte) (byte, error) {
@@ -94,16 +92,4 @@ func bitsToFieldArray(bits []byte) string {
 	}
 	sb.WriteString("]")
 	return sb.String()
-}
-
-// Pack point method reference from edwardsCompress.zok in zokrates
-func Compress_Zokrates(point *babyjub.Point) [32]byte {
-	yBytes := point.Y.Bytes()
-	res := [32]byte{}
-	copy(res[len(res)-len(yBytes):], yBytes)
-	// use odd or even, not sign
-	if point.X.Mod(point.X, big.NewInt(2)).Cmp(big.NewInt(1)) == 0 {
-		res[0] = res[0] | 0x80
-	}
-	return res
 }

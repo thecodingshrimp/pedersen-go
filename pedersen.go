@@ -7,8 +7,9 @@ import (
 	"log"
 	"math/big"
 
+	"github.com/iden3/go-iden3-crypto/babyjub"
 	"github.com/pkg/errors"
-	"github.com/thecodingshrimp/pedersen-go/babyjub"
+	babyjubHelper "github.com/thecodingshrimp/pedersen-go/babyjub"
 )
 
 const zokratesName = "test"
@@ -96,7 +97,7 @@ func (ph *PedersenHash) pedersenHashBasePoint(i int) (*babyjub.Point, error) {
 	formattedStr := fmt.Sprintf("%-28s%04X", ph.name, i)
 	data := []byte(formattedStr)
 
-	return babyjub.FromBytes(ph.hasher256hash(data))
+	return babyjubHelper.FromBytes(ph.hasher256hash(data))
 }
 
 func (ph *PedersenHash) pedersenHashWindows(windows []byte) (*babyjub.Point, error) {
@@ -117,7 +118,7 @@ func (ph *PedersenHash) pedersenHashWindows(windows []byte) (*babyjub.Point, err
 		windows = append(windows, make([]byte, padding)...)
 	}
 
-	result := babyjub.Infinity().Projective()
+	result := babyjub.NewPoint().Projective()
 	segment := babyjub.NewPoint()
 	for j, window := range windows {
 		segment = segment.Mul(big.NewInt(int64((window&0x3)+1)), ph.generators[j])

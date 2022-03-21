@@ -17,9 +17,9 @@ func init() {
 func FromY(y *big.Int) (*babyjub.Point, error) {
 	//x^2 = (y^2 - 1) / (d * y^2 - a)
 	//ysq = y * y mod Q
-	ysq := new(big.Int).Mod(new(big.Int).Mul(y, y), *constants.Q)
+	ysq := new(big.Int).Mod(new(big.Int).Mul(y, y), constants.Q)
 	lhs := new(big.Int).Sub(ysq, constants.One)
-	rhs := new(big.Int).Sub(new(big.Int).Mod(new(big.Int).Mul(ysq, D), constants.Q), A)
+	rhs := new(big.Int).Sub(new(big.Int).Mod(new(big.Int).Mul(ysq, babyjub.D), constants.Q), babyjub.A)
 	//lhs / rhs mod Q
 	xsq := new(big.Int).Mod(new(big.Int).Mul(lhs, new(big.Int).ModInverse(rhs, constants.Q)), constants.Q)
 	x := new(big.Int).ModSqrt(xsq, constants.Q)
@@ -37,6 +37,17 @@ func FromY(y *big.Int) (*babyjub.Point, error) {
 	result.X = new(big.Int).Mod(x, constants.Q)
 	result.Y = new(big.Int).Mod(y, constants.Q)
 	return result, nil
+}
+
+// Pack point method reference from edwardsCompress.zok in zokrates
+func Compress_Zokrates(point *babyjub.Point) [32]byte {
+	yBytes := point.Y.Bytes()
+	res := [32]byte{}
+	copy(res[len(res)-len(yBytes):], yBytes)
+	if !babyjub.PointCoordSign(point.X) {
+		res[0] = res[0] | 0x80
+	}
+	return res
 }
 
 func FromBytes(bytes []byte) (*babyjub.Point, error) {
