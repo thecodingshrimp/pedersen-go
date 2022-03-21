@@ -50,6 +50,14 @@ func Compress_Zokrates(point *babyjub.Point) [32]byte {
 	return res
 }
 
+// Projective returns a PointProjective from the Point
+func SetPointProjective(p *babyjub.Point, pr *babyjub.PointProjective) *babyjub.PointProjective {
+	pr.X.SetBigInt((*big.Int)(p.X))
+	pr.Y.SetBigInt((*big.Int)(p.Y))
+	pr.Z.SetOne()
+	return pr
+}
+
 func FromBytes(bytes []byte) (*babyjub.Point, error) {
 	y := new(big.Int).SetBytes(bytes)
 	y = new(big.Int).Mod(y, constants.Q)

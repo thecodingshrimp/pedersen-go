@@ -17,7 +17,7 @@ const zokratesName = "test"
 type PedersenHash struct {
 	name          string
 	segments      int
-	generators    []*babyjub.Point
+	generators    []babyjub.Point
 	isSized       bool
 	hasher256hash hasher
 }
@@ -42,8 +42,8 @@ func New(name string, segments int) *PedersenHash {
 	return ph
 }
 
-func (ph *PedersenHash) createGenerators() []*babyjub.Point {
-	ph.generators = make([]*babyjub.Point, ph.segments)
+func (ph *PedersenHash) createGenerators() []babyjub.Point {
+	ph.generators = make([]babyjub.Point, ph.segments)
 	segments := ph.segments
 	var current *babyjub.Point
 	var err error
@@ -64,7 +64,7 @@ func (ph *PedersenHash) createGenerators() []*babyjub.Point {
 			currentProjective = babyjub.NewPointProjective().Add(currentProjective, currentProjective)
 			current = currentProjective.Affine()
 		}
-		ph.generators[i] = current
+		ph.generators[i] = *current
 	}
 	return ph.generators
 }
@@ -120,12 +120,14 @@ func (ph *PedersenHash) pedersenHashWindows(windows []byte) (*babyjub.Point, err
 
 	result := babyjub.NewPoint().Projective()
 	segment := babyjub.NewPoint()
+	allocedInt := big.NewInt(0)
+	allocedPointProjective := babyjub.NewPointProjective()
 	for j, window := range windows {
-		segment = segment.Mul(big.NewInt(int64((window&0x3)+1)), ph.generators[j])
+		segment = segment.Mul(allocedInt.SetInt64(int64((window&0x3)+1)), &ph.generators[j])
 		if window > 0x3 {
 			segment.X = segment.X.Neg(segment.X)
 		}
-		result = result.Add(result, segment.Projective())
+		result = result.Add(result, babyjubHelper.SetPointProjective(segment, allocedPointProjective))
 	}
 	return result.Affine(), nil
 }
