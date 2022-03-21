@@ -1,88 +1,58 @@
 package babyjub
 
 import (
-	"bytes"
-	"encoding/hex"
-	"fmt"
+	"errors"
 	"math/big"
-	"strings"
 
-	"github.com/dchest/blake512" // I have personally reviewed that this module doesn't do anything suspicious
+	"github.com/iden3/go-iden3-crypto/babyjub"
+	"github.com/iden3/go-iden3-crypto/constants"
 )
 
-// SwapEndianness swaps the endianness of the value encoded in xs.  If xs is
-// Big-Endian, the result will be Little-Endian and viceversa.
-func SwapEndianness(xs []byte) []byte {
-	ys := make([]byte, len(xs))
-	for i, b := range xs {
-		ys[len(xs)-1-i] = b
+var C *big.Int
+
+func init() {
+	C = big.NewInt(8)
+}
+
+func FromY(y *big.Int) (*babyjub.Point, error) {
+	//x^2 = (y^2 - 1) / (d * y^2 - a)
+	//ysq = y * y mod Q
+	ysq := new(big.Int).Mod(new(big.Int).Mul(y, y), *constants.Q)
+	lhs := new(big.Int).Sub(ysq, constants.One)
+	rhs := new(big.Int).Sub(new(big.Int).Mod(new(big.Int).Mul(ysq, D), constants.Q), A)
+	//lhs / rhs mod Q
+	xsq := new(big.Int).Mod(new(big.Int).Mul(lhs, new(big.Int).ModInverse(rhs, constants.Q)), constants.Q)
+	x := new(big.Int).ModSqrt(xsq, constants.Q)
+
+	if x == nil {
+		return nil, errors.New("Sqrt Non Exists")
 	}
-	return ys
-}
-
-// BigIntLEBytes encodes a big.Int into an array in Little-Endian.
-func BigIntLEBytes(v *big.Int) [32]byte {
-	le := SwapEndianness(v.Bytes())
-	res := [32]byte{}
-	copy(res[:], le)
-	return res
-}
-
-// SetBigIntFromLEBytes sets the value of a big.Int from a Little-Endian
-// encoded value.
-func SetBigIntFromLEBytes(v *big.Int, leBuf []byte) *big.Int {
-	beBuf := SwapEndianness(leBuf)
-	return v.SetBytes(beBuf)
-}
-
-// Blake512 performs the blake-512 hash over the buffer m.  Note that this is
-// the original blake from the SHA3 competition and not the new blake2 version.
-func Blake512(m []byte) []byte {
-	h := blake512.New()
-	h.Write(m[:])
-	return h.Sum(nil)
-}
-
-// Hex is a byte slice type that can be marshalled and unmarshaled in hex
-type Hex []byte
-
-// MarshalText encodes buf as hex
-func (buf Hex) MarshalText() ([]byte, error) {
-	return []byte(hex.EncodeToString(buf)), nil
-}
-
-// String encodes buf as hex
-func (buf Hex) String() string {
-	return hex.EncodeToString(buf)
-}
-
-// HexEncode encodes an array of bytes into a string in hex.
-func HexEncode(bs []byte) string {
-	return fmt.Sprintf("0x%s", hex.EncodeToString(bs))
-}
-
-// HexDecode decodes a hex string into an array of bytes.
-func HexDecode(h string) ([]byte, error) {
-	if strings.HasPrefix(h, "0x") {
-		h = h[2:]
+	tmp := new(big.Int).Sub(constants.Q, x)
+	//use the bigger sqrt
+	if x.Cmp(tmp) == -1 {
+		x.Set(tmp)
 	}
-	return hex.DecodeString(h)
+
+	result := babyjub.NewPoint()
+	result.X = new(big.Int).Mod(x, constants.Q)
+	result.Y = new(big.Int).Mod(y, constants.Q)
+	return result, nil
 }
 
-// HexDecodeInto decodes a hex string into an array of bytes (dst), verifying
-// that the decoded array has the same length as dst.
-func HexDecodeInto(dst []byte, h []byte) error {
-	if bytes.HasPrefix(h, []byte("0x")) {
-		h = h[2:]
+func FromBytes(bytes []byte) (*babyjub.Point, error) {
+	y := new(big.Int).SetBytes(bytes)
+	y = new(big.Int).Mod(y, constants.Q)
+	for {
+		p, err := FromY(y)
+		if err != nil {
+			y = y.Add(y, constants.One)
+		} else {
+			p = babyjub.NewPoint().Mul(C, p)
+			if p.InSubGroup() {
+				return p, nil
+			} else {
+				return nil, errors.New("Point not on prime-ordered subgroup")
+			}
+		}
 	}
-	if len(h)/2 != len(dst) {
-		return fmt.Errorf("expected %v bytes in hex string, got %v", len(dst), len(h)/2)
-	}
-	n, err := hex.Decode(dst, h)
-	if err != nil {
-		return err
-	} else if n != len(dst) {
-		return fmt.Errorf("expected %v bytes when decoding hex string, got %v", len(dst), n)
-	}
-	return nil
 }
