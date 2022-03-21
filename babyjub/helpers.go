@@ -44,7 +44,8 @@ func Compress_Zokrates(point *babyjub.Point) [32]byte {
 	yBytes := point.Y.Bytes()
 	res := [32]byte{}
 	copy(res[len(res)-len(yBytes):], yBytes)
-	if !babyjub.PointCoordSign(point.X) {
+	// use odd or even, not sign
+	if point.X.Mod(point.X, big.NewInt(2)).Cmp(big.NewInt(1)) == 0 {
 		res[0] = res[0] | 0x80
 	}
 	return res
